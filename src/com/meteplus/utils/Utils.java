@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
@@ -52,6 +53,60 @@ public class Utils {
      * 133,153,180,181,189,177,1700 
      */  
     private static String  CT = "((?<!\\d)1(33|53|77|8[019])\\d{8}(?!\\d))|((?<!\\d)1700\\d{7}(?!\\d))";  
+
+    /**
+     * local时间转换成UTC时间
+     * @param localTime
+     * @return
+     */
+    public static Date localToUTC(String localTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date localDate= null;
+        try {
+            localDate = sdf.parse(localTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long localTimeInMillis=localDate.getTime();
+        /** long时间转换成Calendar */
+        Calendar calendar= Calendar.getInstance();
+        calendar.setTimeInMillis(localTimeInMillis);
+        /** 取得时间偏移量 */
+        int zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET);
+        /** 取得夏令时差 */
+        int dstOffset = calendar.get(java.util.Calendar.DST_OFFSET);
+        /** 从本地时间里扣除这些差量，即可以取得UTC时间*/
+        calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+        /** 取得的时间就是UTC标准时间 */
+        Date utcDate=new Date(calendar.getTimeInMillis());
+        return utcDate;
+    }
+    
+    /**
+     * local时间转换成UTC时间
+     * @param localDate
+     * @param utcTimePatten
+     * @return
+     */
+    public static String localToUTC(Date localDate,String utcTimePatten) {
+       
+        long localTimeInMillis=localDate.getTime();
+        /** long时间转换成Calendar */
+        Calendar calendar= Calendar.getInstance();
+        calendar.setTimeInMillis(localTimeInMillis);
+        /** 取得时间偏移量 */
+        int zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET);
+        /** 取得夏令时差 */
+        int dstOffset = calendar.get(java.util.Calendar.DST_OFFSET);
+        /** 从本地时间里扣除这些差量，即可以取得UTC时间*/
+        calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+        /** 取得的时间就是UTC标准时间 */
+        Date utcDate=new Date(calendar.getTimeInMillis());
+        SimpleDateFormat  utcFormater = new SimpleDateFormat(utcTimePatten);
+
+        return utcFormater.format(utcDate);
+    }    
+    
     
     //System.out.println(getMobile(note,"("+MOBILE+")"+"|("+CM+")"+"|("+CU+")"+"|("+CT+")"));    
     public static String utc2Local(String utcTime, String utcTimePatten,String localTimePatten) {
